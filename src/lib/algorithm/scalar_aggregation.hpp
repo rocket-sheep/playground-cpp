@@ -17,6 +17,7 @@ typename ForwardIt::value_type scalar_aggregation_naive(
     // WARNING: The compiler is usually smart enough to auto-vectorize this simple loop,
     // so we must instruct it explicitly not to do so
     #pragma clang loop vectorize(disable)
+    #pragma clang loop unroll(disable)
     for (auto&& it = input_begin; it != input_end; ++it)
         total = reduce(total, *it);
 
