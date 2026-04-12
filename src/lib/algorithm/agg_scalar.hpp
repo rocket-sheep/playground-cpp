@@ -6,7 +6,7 @@
 namespace playground {
 
 template <typename ForwardIt, typename T, typename BinaryOp>
-typename ForwardIt::value_type scalar_aggregation_naive(
+typename ForwardIt::value_type agg_scalar_naive(
     ForwardIt input_begin,
     ForwardIt input_end,
     T initial_value,
@@ -25,13 +25,13 @@ typename ForwardIt::value_type scalar_aggregation_naive(
 }
 
 template <typename ForwardIt>
-typename ForwardIt::value_type scalar_sum_naive(ForwardIt input_begin, ForwardIt input_end)
+typename ForwardIt::value_type sum_scalar_naive(ForwardIt input_begin, ForwardIt input_end)
 {
-    return scalar_aggregation_naive(input_begin, input_end, typename ForwardIt::value_type(), std::plus<>());
+    return agg_scalar_naive(input_begin, input_end, typename ForwardIt::value_type(), std::plus<>());
 }
 
 template <size_t lane_count, typename RandomIt, typename T, typename BinaryOp>
-typename RandomIt::value_type scalar_aggregation_vectorized(
+typename RandomIt::value_type agg_scalar_unrolled(
     RandomIt input_begin,
     RandomIt input_end,
     T initial_value,
@@ -67,13 +67,13 @@ typename RandomIt::value_type scalar_aggregation_vectorized(
 }
 
 template <size_t lane_count, typename RandomIt>
-typename RandomIt::value_type scalar_sum_vectorized(RandomIt input_begin, RandomIt input_end)
+typename RandomIt::value_type sum_scalar_unrolled(RandomIt input_begin, RandomIt input_end)
 {
-    return scalar_aggregation_vectorized<lane_count>(input_begin, input_end, typename RandomIt::value_type(), std::plus<>());
+    return agg_scalar_unrolled<lane_count>(input_begin, input_end, typename RandomIt::value_type(), std::plus<>());
 }
 
 template <typename ForwardIt, typename T, typename BinaryOp>
-typename ForwardIt::value_type scalar_aggregation_auto_vectorized(
+typename ForwardIt::value_type agg_scalar_auto_vectorized(
     ForwardIt input_begin,
     ForwardIt input_end,
     T initial_value,
@@ -88,9 +88,9 @@ typename ForwardIt::value_type scalar_aggregation_auto_vectorized(
 }
 
 template <typename ForwardIt>
-typename ForwardIt::value_type scalar_sum_auto_vectorized(ForwardIt input_begin, ForwardIt input_end)
+typename ForwardIt::value_type sum_scalar_auto_vectorized(ForwardIt input_begin, ForwardIt input_end)
 {
-    return scalar_aggregation_auto_vectorized(input_begin, input_end, typename ForwardIt::value_type(), std::plus<>());
+    return agg_scalar_auto_vectorized(input_begin, input_end, typename ForwardIt::value_type(), std::plus<>());
 }
 
 } // namespace playground

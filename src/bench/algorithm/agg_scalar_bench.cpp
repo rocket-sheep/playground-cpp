@@ -6,7 +6,7 @@
 #include <span>
 #include <vector>
 
-#include "algorithm/scalar_aggregation.hpp"
+#include "algorithm/agg_scalar.hpp"
 #include "random/data_generator.hpp"
 #include "util/units.hpp"
 
@@ -31,7 +31,7 @@ static void bench_agg_scalar(State& state)
 
 static uint32_t sum_naive(const std::span<const uint32_t>& input)
 {
-    return scalar_sum_naive(input.begin(), input.end());
+    return sum_scalar_naive(input.begin(), input.end());
 }
 
 BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_naive)->Arg(16_Mi);
@@ -39,7 +39,7 @@ BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_naive)->Arg(16_Mi);
 template <size_t vector_size>
 static uint32_t sum_unrolled(const std::span<const uint32_t>& input)
 {
-    return scalar_sum_vectorized<vector_size>(input.begin(), input.end());
+    return sum_scalar_unrolled<vector_size>(input.begin(), input.end());
 }
 
 BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_unrolled<2>)->Arg(16_Mi);
@@ -50,7 +50,7 @@ BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_unrolled<32>)->Arg(16_Mi);
 
 static uint32_t sum_auto_vectorized(const std::span<const uint32_t>& input)
 {
-    return scalar_sum_auto_vectorized(input.begin(), input.end());
+    return sum_scalar_auto_vectorized(input.begin(), input.end());
 }
 
 BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_auto_vectorized)->Arg(16_Mi);
