@@ -45,9 +45,11 @@ typename RandomIt::value_type scalar_aggregation_vectorized(
     auto&& vectorized_end = input_end - input_size % lane_count;
     // Make sure we do not auto-vectorize the outer loop
     #pragma clang loop vectorize(disable)
+    #pragma clang loop unroll(disable)
     for (auto&& it = input_begin; it < vectorized_end; it += lane_count) {
         // Force unrolling of the inner loop
         #pragma clang loop unroll(enable)
+        #pragma clang loop vectorize(disable)
         for (size_t i = 0; i < lane_count; ++i)
             partial_totals[i] = reduce(partial_totals[i], *(it + i));
     }
@@ -68,6 +70,27 @@ template <size_t lane_count, typename RandomIt>
 typename RandomIt::value_type scalar_sum_vectorized(RandomIt input_begin, RandomIt input_end)
 {
     return scalar_aggregation_vectorized<lane_count>(input_begin, input_end, typename RandomIt::value_type(), std::plus<>());
+}
+
+template <typename ForwardIt, typename T, typename BinaryOp>
+typename ForwardIt::value_type scalar_aggregation_auto_vectorized(
+    ForwardIt input_begin,
+    ForwardIt input_end,
+    T initial_value,
+    BinaryOp reduce)
+{
+    T total = initial_value;
+
+    for (auto&& it = input_begin; it != input_end; ++it)
+        total = reduce(total, *it);
+
+    return total;
+}
+
+template <typename ForwardIt>
+typename ForwardIt::value_type scalar_sum_auto_vectorized(ForwardIt input_begin, ForwardIt input_end)
+{
+    return scalar_aggregation_auto_vectorized(input_begin, input_end, typename ForwardIt::value_type(), std::plus<>());
 }
 
 } // namespace playground
