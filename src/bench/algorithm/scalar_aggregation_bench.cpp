@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
+#include <span>
 #include <vector>
 
 #include "algorithm/scalar_aggregation.hpp"
@@ -12,58 +13,51 @@
 using namespace benchmark;
 using namespace playground;
 
-static void _scalar_sum_stdlib(State& state)
+template <uint32_t (*function)(const std::span<const uint32_t>&)>
+static void bench_agg_scalar(State& state)
 {
     const size_t size = state.range(0);
     DataGenerator data_generator;
     const std::vector<uint32_t> input = data_generator.random_data<uint32_t>(size);
 
     for (auto _ : state) {
-        auto sum = std::reduce(input.begin(), input.end(), 0, std::plus<>());
-        DoNotOptimize(sum);
+        auto result = function(input);
+        DoNotOptimize(result);
     }
 
     state.counters["thru.in.items"] = Counter(input.size(), Counter::kIsIterationInvariantRate);
     state.counters["thru.in.bytes"] = Counter(input.size() * sizeof(uint32_t), Counter::kIsIterationInvariantRate);
 }
 
-BENCHMARK(_scalar_sum_stdlib)->Arg(16_Mi);
-
-static void _scalar_sum_naive(State& state)
+static uint32_t sum_naive(const std::span<const uint32_t>& input)
 {
-    const size_t size = state.range(0);
-    DataGenerator data_generator;
-    const std::vector<uint32_t> input = data_generator.random_data<uint32_t>(size);
-
-    for (auto _ : state) {
-        auto sum = scalar_sum_naive(input.begin(), input.end());
-        DoNotOptimize(sum);
-    }
-
-    state.counters["thru.in.items"] = Counter(input.size(), Counter::kIsIterationInvariantRate);
-    state.counters["thru.in.bytes"] = Counter(input.size() * sizeof(uint32_t), Counter::kIsIterationInvariantRate);
+    return scalar_sum_naive(input.begin(), input.end());
 }
 
-BENCHMARK(_scalar_sum_naive)->Arg(16_Mi);
+BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_naive)->Arg(16_Mi);
 
 template <size_t vector_size>
-static void _scalar_sum_vectorized(State& state)
+static uint32_t sum_unrolled(const std::span<const uint32_t>& input)
 {
-    const size_t size = state.range(0);
-    DataGenerator data_generator;
-    const std::vector<uint32_t> input = data_generator.random_data<uint32_t>(size);
-
-    for (auto _ : state) {
-        auto sum = scalar_sum_vectorized<vector_size>(input.begin(), input.end());
-        DoNotOptimize(sum);
-    }
-
-    state.counters["thru.in.items"] = Counter(input.size(), Counter::kIsIterationInvariantRate);
-    state.counters["thru.in.bytes"] = Counter(input.size() * sizeof(uint32_t), Counter::kIsIterationInvariantRate);
+    return scalar_sum_vectorized<vector_size>(input.begin(), input.end());
 }
 
-BENCHMARK(_scalar_sum_vectorized<2>)->Arg(16_Mi);
-BENCHMARK(_scalar_sum_vectorized<4>)->Arg(16_Mi);
-BENCHMARK(_scalar_sum_vectorized<8>)->Arg(16_Mi);
-BENCHMARK(_scalar_sum_vectorized<16>)->Arg(16_Mi);
-BENCHMARK(_scalar_sum_vectorized<32>)->Arg(16_Mi);
+BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_unrolled<2>)->Arg(16_Mi);
+BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_unrolled<4>)->Arg(16_Mi);
+BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_unrolled<8>)->Arg(16_Mi);
+BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_unrolled<16>)->Arg(16_Mi);
+BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_unrolled<32>)->Arg(16_Mi);
+
+static uint32_t sum_auto_vectorized(const std::span<const uint32_t>& input)
+{
+    return scalar_sum_auto_vectorized(input.begin(), input.end());
+}
+
+BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_auto_vectorized)->Arg(16_Mi);
+
+static uint32_t sum_stdlib(const std::span<const uint32_t>& input)
+{
+    return std::reduce(input.begin(), input.end(), 0, std::plus<>());
+}
+
+BENCHMARK_TEMPLATE(bench_agg_scalar, &sum_stdlib)->Arg(16_Mi);
