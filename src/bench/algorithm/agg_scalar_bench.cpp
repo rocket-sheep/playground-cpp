@@ -7,10 +7,12 @@
 #include <vector>
 
 #include "algorithm/agg_scalar.hpp"
+#include "perf_utils/BenchmarkPerfCounterRecorder.hpp"
 #include "random/data_generator.hpp"
 #include "util/units.hpp"
 
 using namespace benchmark;
+using namespace perf_utils;
 using namespace playground;
 
 template <uint32_t (*function)(const std::span<const uint32_t>&)>
@@ -20,13 +22,16 @@ static void bench_agg_scalar(State& state)
     DataGenerator data_generator;
     const std::vector<uint32_t> input = data_generator.random_data<uint32_t>(size);
 
-    for (auto _ : state) {
-        auto result = function(input);
-        DoNotOptimize(result);
-    }
+    BenchmarkPerfCounterRecorder bpcr(state);
+    bpcr.record([&]() {
+        for (auto _ : state) {
+            auto result = function(input);
+            DoNotOptimize(result);
+        }
+    });
 
-    state.counters["thru.in.items"] = Counter(input.size(), Counter::kIsIterationInvariantRate);
-    state.counters["thru.in.bytes"] = Counter(input.size() * sizeof(uint32_t), Counter::kIsIterationInvariantRate);
+    state.counters["thru.in.item"] = Counter(input.size(), Counter::kIsIterationInvariantRate);
+    state.counters["thru.in.byte"] = Counter(input.size() * sizeof(uint32_t), Counter::kIsIterationInvariantRate);
 }
 
 static uint32_t sum_naive(const std::span<const uint32_t>& input)
