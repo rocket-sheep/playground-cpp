@@ -73,8 +73,8 @@ static void control_flow(State& state)
     for (auto _ : state) {
         size_t error_count = f(std::span(data), log2p);
         DoNotOptimize(error_count);
-        state.counters["errors.thru"] = Counter(error_count, Counter::kIsIterationInvariantRate);
-        state.counters["errors.count"] = Counter(error_count, Counter::kDefaults);
+        state.counters["error.thru"] = Counter(error_count, Counter::kIsIterationInvariantRate);
+        state.counters["error.count"] = Counter(error_count, Counter::kDefaults);
     }
 }
 
