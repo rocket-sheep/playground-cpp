@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include "base/types.hpp"
+
 using namespace playground;
 
 namespace {
@@ -54,10 +56,12 @@ std::vector<T> DataGenerator::range(
     return range_internal(_random_engine, lower_bound_inclusive, upper_bound_exclusive, density);
 }
 
+template std::vector<uint128_t> DataGenerator::range(uint128_t, uint128_t, float);
 template std::vector<uint64_t> DataGenerator::range(uint64_t, uint64_t, float);
 template std::vector<uint32_t> DataGenerator::range(uint32_t, uint32_t, float);
 template std::vector<uint16_t> DataGenerator::range(uint16_t, uint16_t, float);
 template std::vector<uint8_t> DataGenerator::range(uint8_t, uint8_t, float);
+template std::vector<int128_t> DataGenerator::range(int128_t, int128_t, float);
 template std::vector<int64_t> DataGenerator::range(int64_t, int64_t, float);
 template std::vector<int32_t> DataGenerator::range(int32_t, int32_t, float);
 template std::vector<int16_t> DataGenerator::range(int16_t, int16_t, float);
@@ -72,10 +76,12 @@ std::vector<T> DataGenerator::random_data(
     return random_data_internal(_random_engine, size, lower_bound_inclusive, upper_bound_exclusive);
 }
 
+template std::vector<uint128_t> DataGenerator::random_data<uint128_t>(size_t, uint128_t, uint128_t);
 template std::vector<uint64_t> DataGenerator::random_data<uint64_t>(size_t, uint64_t, uint64_t);
 template std::vector<uint32_t> DataGenerator::random_data<uint32_t>(size_t, uint32_t, uint32_t);
 template std::vector<uint16_t> DataGenerator::random_data<uint16_t>(size_t, uint16_t, uint16_t);
 template std::vector<uint8_t> DataGenerator::random_data<uint8_t>(size_t, uint8_t, uint8_t);
+template std::vector<int128_t> DataGenerator::random_data<int128_t>(size_t, int128_t, int128_t);
 template std::vector<int64_t> DataGenerator::random_data<int64_t>(size_t, int64_t, int64_t);
 template std::vector<int32_t> DataGenerator::random_data<int32_t>(size_t, int32_t, int32_t);
 template std::vector<int16_t> DataGenerator::random_data<int16_t>(size_t, int16_t, int16_t);
