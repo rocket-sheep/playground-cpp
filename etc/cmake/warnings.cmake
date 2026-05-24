@@ -58,6 +58,7 @@ list(APPEND WARNINGS -Werror)
 
 # Unused code warnings are useful, but they do not deserve a hard error.
 warning(no_error unused-function)
+warning(no_error unused-local-typedef)
 warning(no_error unused-member-function)
 warning(no_error unused-private-field)
 warning(no_error unused-template)
