@@ -30,3 +30,54 @@ TEST(merge, join_merge_inner_2way_branchless)
         return join_merge_inner_2way_branchless(lhs, rhs);
     });
 }
+
+static void _test_join_merge_inner_kway(
+    std::vector<std::vector<size_t>> (*function)(const std::span<const std::span<const uint32_t>>&))
+{
+    std::vector<std::vector<uint32_t>> inputs = {
+        { 0, 1, 2, 3, 4, 5,    7       },
+        {    1,    3, 4, 5,    7,    9 },
+        {       2, 3,    5, 6, 7, 8    },
+        { 0, 1,    3, 4, 5,    7, 8, 9 },
+        {    1, 2, 3, 4, 5, 6, 7, 8    },
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+        { 0,    2, 3,    5, 6, 7       },
+    };
+
+    const std::vector<std::vector<size_t>> expected_indices = {
+        { 3, 5, 6 },
+        { 1, 3, 4 },
+        { 1, 2, 4 },
+        { 2, 4, 5 },
+        { 2, 4, 6 },
+        { 3, 5, 7 },
+        { 2, 3, 5 },
+    };
+
+    for (size_t lane_count = 3; lane_count <= inputs.size(); ++lane_count)
+    {
+        std::vector<std::span<const uint32_t>> input_spans;
+        for (size_t i = 0; i < lane_count; ++i)
+            input_spans.push_back(inputs[i]);
+        
+        auto expected = expected_indices;
+        expected.resize(lane_count);
+
+        const auto observed = function(input_spans);
+        EXPECT_EQ(observed, expected) << "(for " << lane_count << " lanes)" ;
+    }
+}
+
+TEST(merge, join_merge_inner_kway_heap)
+{
+    _test_join_merge_inner_kway([](const auto& inputs) {
+        return join_merge_inner_kway_heap(inputs);
+    });
+}
+
+TEST(merge, join_merge_inner_kway_branchless)
+{
+    _test_join_merge_inner_kway([](const auto& inputs) {
+        return join_merge_inner_kway_branchless(inputs);
+    });
+}
