@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "algorithm/join_hash.hpp"
 #include "algorithm/join_merge.hpp"
 #include "base/types.hpp"
 #include "perf_utils/BenchmarkPerfCounterRecorder.hpp"
@@ -57,15 +58,30 @@ static void _bench_join_inner_2way(State& state)
     state.counters["thru.out.byte"] = Counter(output_size * sizeof(T), Counter::kIsIterationInvariantRate);
 }
 
+BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint32_t, &playground::join_hash_inner_2way_std, &build_input_int)
+    ->RangeMultiplier(2)->Range(1, 16)->Name("join_hash_inner_2way_std<uint32>");
+BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint32_t, &playground::join_hash_inner_2way_absl, &build_input_int)
+    ->RangeMultiplier(2)->Range(1, 16)->Name("join_hash_inner_2way_absl<uint32>");
+
 BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint32_t, &playground::join_merge_inner_2way_naive, &build_input_int)
     ->RangeMultiplier(2)->Range(1, 16)->Name("join_merge_inner_2way_naive<uint32>");
 BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint32_t, &playground::join_merge_inner_2way_branchless, &build_input_int)
     ->RangeMultiplier(2)->Range(1, 16)->Name("join_merge_inner_2way_branchless<uint32>");
 
+BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint64_t, &playground::join_hash_inner_2way_std, &build_input_int)
+    ->RangeMultiplier(2)->Range(1, 16)->Name("join_hash_inner_2way_std<uint64>");
+BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint64_t, &playground::join_hash_inner_2way_absl, &build_input_int)
+    ->RangeMultiplier(2)->Range(1, 16)->Name("join_hash_inner_2way_absl<uint64>");
+
 BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint64_t, &playground::join_merge_inner_2way_naive, &build_input_int)
     ->RangeMultiplier(2)->Range(1, 16)->Name("join_merge_inner_2way_naive<uint64>");
 BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint64_t, &playground::join_merge_inner_2way_branchless, &build_input_int)
     ->RangeMultiplier(2)->Range(1, 16)->Name("join_merge_inner_2way_branchless<uint64>");
+
+BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint128_t, &playground::join_hash_inner_2way_std, &build_input_int)
+    ->RangeMultiplier(2)->Range(1, 16)->Name("join_hash_inner_2way_std<uint128>");
+BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint128_t, &playground::join_hash_inner_2way_absl, &build_input_int)
+    ->RangeMultiplier(2)->Range(1, 16)->Name("join_hash_inner_2way_absl<uint128>");
 
 BENCHMARK_TEMPLATE(_bench_join_inner_2way, uint128_t, &playground::join_merge_inner_2way_naive, &build_input_int)
     ->RangeMultiplier(2)->Range(1, 16)->Name("join_merge_inner_2way_naive<uint128>");

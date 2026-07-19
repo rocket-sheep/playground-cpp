@@ -37,6 +37,8 @@ endif ()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
+warning(disable gcc-compat)
+warning(disable nullability-extension)
 warning(disable unsequenced)
 warning(disable unused-parameter)
 
